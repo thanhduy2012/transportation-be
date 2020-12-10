@@ -7,6 +7,5 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel="spring", uses = {})
 public interface RouteMapper extends EntityMapper<RouteDTO, Route>{
-    @Mapping(source = "complexity.id", target = "complexityId")
     RouteDTO toDto(Route route);
 }

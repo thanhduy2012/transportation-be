@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,9 +61,7 @@ public class CoachService {
 
         CoachDTO coach = request.getCoach();
 
-        Pageable pageable = PageRequest.of(request.getPageNumber() - 1, request.getPageSize());
-        System.out.println("from date : " +  coach.getFromLastDateMaintenance());
-        System.out.println("to date : " +  coach.getToLastDateMaintenance());
+        Pageable pageable = PageRequest.of(request.getPageNumber() - 1, request.getPageSize(), Sort.Direction.DESC, "id");
         Page<Coach> paging = coachRepository.findAllCoach(
                 pageable,
                 !(StringUtils.isEmpty(coach.getLicensePlate())) ? coach.getLicensePlate() : null,

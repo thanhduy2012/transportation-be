@@ -4,8 +4,10 @@ import com.ptit.transportationmanagement.client.dto.route.*;
 import com.ptit.transportationmanagement.common.utils.OptimizedPageUtils;
 import com.ptit.transportationmanagement.common.utils.StringUtils;
 import com.ptit.transportationmanagement.domain.Route;
+import com.ptit.transportationmanagement.repository.ComplexityRepository;
 import com.ptit.transportationmanagement.repository.RouteRepository;
 import com.ptit.transportationmanagement.service.dto.RouteDTO;
+import com.ptit.transportationmanagement.service.mapper.ComplexityMapper;
 import com.ptit.transportationmanagement.service.mapper.RouteMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -28,6 +30,10 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
 
+    private final ComplexityRepository complexityRepository;
+
+    private final ComplexityMapper complexityMapper;
+
     private final RouteMapper routeMapper;
 
     public CreateRouteResponse create(CreateRouteRequest request) throws Exception {
@@ -40,12 +46,18 @@ public class RouteService {
         if(request.getRoute() == null ){
             throw  new Exception("Route not null !");
         }
+
+        System.out.println("request "+request.getRoute());
         Route route = routeMapper.toEntity(request.getRoute());
+     ;
+
         route.setCreatedDate(LocalDate.now());
         route.setCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
         Route save = routeRepository.save(route);
 
-        response.setRoute(routeMapper.toDto(save));
+        RouteDTO routeDTO = routeMapper.toDto(save);
+        routeDTO.setComplexity(complexityMapper.toDto(complexityRepository.findById(route.getComplexity().getId()).get()));
+        response.setRoute(routeDTO);
         return response;
     }
 
@@ -93,14 +105,19 @@ public class RouteService {
                 !(request.getRoute().getLength() == null) ? request.getRoute().getLength() : route.getLength()
         );
 
+        route.setComplexity(
+                !(request.getRoute().getComplexity() == null) ? complexityMapper.toEntity(request.getRoute().getComplexity())  : route.getComplexity()
+        );
+
         route.setUpdatedDate(LocalDate.now());
         route.setUpdatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Route save = routeRepository.save(route);
 
         UpdateRouteResponse response = new UpdateRouteResponse();
-        response.setRoute(routeMapper.toDto(save));
-
+        RouteDTO routeDTO = routeMapper.toDto(save);
+        routeDTO.setComplexity(complexityMapper.toDto(complexityRepository.findById(route.getComplexity().getId()).get()));
+        response.setRoute(routeDTO);
         return response;
 
     }
