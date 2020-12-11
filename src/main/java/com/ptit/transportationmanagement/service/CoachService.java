@@ -5,8 +5,11 @@ import com.ptit.transportationmanagement.common.domain.OptimizedPage;
 import com.ptit.transportationmanagement.common.utils.OptimizedPageUtils;
 import com.ptit.transportationmanagement.common.utils.StringUtils;
 import com.ptit.transportationmanagement.domain.Coach;
+import com.ptit.transportationmanagement.domain.CoachTrip;
 import com.ptit.transportationmanagement.repository.CoachRepository;
+import com.ptit.transportationmanagement.repository.CoachTripRepository;
 import com.ptit.transportationmanagement.service.dto.CoachDTO;
+import com.ptit.transportationmanagement.service.dto.SalaryCoachDTO;
 import com.ptit.transportationmanagement.service.mapper.CoachMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,6 +34,9 @@ public class CoachService {
     private final Logger LOG = LoggerFactory.getLogger(CoachService.class);
 
     private final CoachRepository coachRepository;
+
+    private final CoachTripRepository coachTripRepository;
+
 
     private final CoachMapper coachMapper;
 
@@ -104,6 +111,10 @@ public class CoachService {
         coach.setSeatNumber(
                 (request.getCoach().getSeatNumber() == null) ? request.getCoach().getSeatNumber() : coach.getSeatNumber()
         );
+
+        coach.setNumOfmaintain(
+                (request.getCoach().getNumOfmaintain() == null) ? request.getCoach().getNumOfmaintain() : coach.getNumOfmaintain()
+        );
         coach.setModel(
                 (!StringUtils.isEmpty(request.getCoach().getModel())) ? request.getCoach().getModel() : coach.getModel()
         );
@@ -131,6 +142,41 @@ public class CoachService {
 
         DeleteCoachByIdResponse response = new DeleteCoachByIdResponse();
         response.setCoach(coachMapper.toDto(coach));
+
+        return response;
+
+    }
+
+
+    public GetSalaryResponse getSalary(GetSalaryRequest request) throws Exception {
+
+        if(request == null) throw new Exception("Request not null");
+
+        SalaryCoachDTO salaryCoachDTO = new SalaryCoachDTO();
+
+        Coach coach = coachRepository.findById(request.getCoachId()).get();
+
+        List<CoachTrip> byCoachId = coachTripRepository.findByCoachIdWithDate(request.getCoachId(),request.getFromDate(),request.getToDate());
+
+
+        System.out.println("size : " + byCoachId.size());
+        Double distance = 0D;
+        Double salary = 0D;
+
+        for (CoachTrip i :byCoachId
+             ) {
+            distance += i.getDistance();
+
+            salary += i.getSalary();
+        }
+
+
+        salaryCoachDTO.setCoach(coachMapper.toDto(coach));
+        salaryCoachDTO.setNumberTrip(byCoachId.size());
+        salaryCoachDTO.setDistance(distance);
+        salaryCoachDTO.setSalary(salary);
+        GetSalaryResponse response = new GetSalaryResponse();
+        response.setSalaryCoachDTO(salaryCoachDTO);
 
         return response;
 

@@ -1,8 +1,10 @@
 package com.ptit.transportationmanagement.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "coach_trip")
@@ -21,4 +23,11 @@ public class CoachTrip {
     private Trip trip;
 
     private Integer status;
+
+    private Double salary;
+
+    private Double distance;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate date;
 }

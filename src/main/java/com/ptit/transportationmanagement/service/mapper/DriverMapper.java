@@ -7,4 +7,5 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {})
 public interface DriverMapper extends EntityMapper<DriverDTO,Driver> {
+
 }

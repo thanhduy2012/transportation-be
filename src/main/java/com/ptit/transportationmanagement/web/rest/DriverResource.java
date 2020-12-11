@@ -1,5 +1,7 @@
 package com.ptit.transportationmanagement.web.rest;
 
+import com.ptit.transportationmanagement.client.dto.coach.GetSalaryRequest;
+import com.ptit.transportationmanagement.client.dto.coach.GetSalaryResponse;
 import com.ptit.transportationmanagement.client.dto.driver.*;
 import com.ptit.transportationmanagement.service.DriverService;
 import org.slf4j.Logger;
@@ -45,6 +47,17 @@ public class DriverResource {
         }
     }
 
+    @PostMapping("/salary")
+    public ResponseEntity<?> salaryOfDriverWithMonth(@RequestBody GetSalaryOfDriverWithMonthRequest request){
+        try {
+            GetSalaryOfDriverWithMonthResponse response = driverService.getSalaryWithMonth(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            LOG.error(this.getClass().getName(), e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/update")
     public ResponseEntity<?> update(@RequestBody UpdateDriverRequest request){
         try {
@@ -66,4 +79,6 @@ public class DriverResource {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
 }

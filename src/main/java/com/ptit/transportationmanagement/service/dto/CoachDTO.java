@@ -42,6 +42,8 @@ public class CoachDTO implements Serializable {
     @NotNull
     private Integer seatNumber;
 
+    private Integer numOfmaintain;
+
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate lastDateMaintenance;

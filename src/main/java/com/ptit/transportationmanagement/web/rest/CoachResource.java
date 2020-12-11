@@ -65,4 +65,15 @@ public class CoachResource {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/salary")
+    public  ResponseEntity<?> getSalary(@RequestBody GetSalaryRequest request){
+        try {
+            GetSalaryResponse response = coachService.getSalary(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            LOG.error(this.getClass().getName(), e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
