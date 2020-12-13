@@ -7,18 +7,25 @@ import com.ptit.transportationmanagement.domain.Role;
 import com.ptit.transportationmanagement.repository.AccountRepository;
 import com.ptit.transportationmanagement.repository.AccountRoleRepository;
 import com.ptit.transportationmanagement.repository.RoleRepository;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.sql.DataSource;
 import java.util.Collections;
 
 @SpringBootApplication
 @AllArgsConstructor
 public class TransportationManagementApplication {
+
+    @Autowired
+    private HikariDataSource dataSource;
 
     public static void main(String[] args) {
         SpringApplication.run(TransportationManagementApplication.class, args);
@@ -29,9 +36,10 @@ public class TransportationManagementApplication {
     private AccountRoleRepository accountRoleRepository;
     private PasswordEncoder passwordEncoder;
 
-//    @Bean
-//    public CommandLineRunner runner(){
-//        return args -> {
+    @Bean
+    public CommandLineRunner runner(){
+        return args -> {
+            System.out.println(dataSource.getJdbcUrl());
 //            Role role = new Role()
 //                    .setRoleName("ADMIN");
 //            if(!roleRepository.findByRoleName(role.getRoleName()).isPresent()){
@@ -55,6 +63,6 @@ public class TransportationManagementApplication {
 //            AccountRole accountRole = new AccountRole();
 //            accountRole.setId(pk);
 //            accountRoleRepository.save(accountRole);
-//        };
-//    }
+        };
+    }
 }
