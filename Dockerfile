@@ -15,5 +15,7 @@ WORKDIR /opt/be
 
 COPY --from=buildJar /opt/app .
 
+RUN ls
+
 CMD ["java", "-jar", "target/*.jar"]
 
