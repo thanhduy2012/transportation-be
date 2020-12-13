@@ -13,9 +13,9 @@ FROM openjdk:8
 
 WORKDIR /opt/be
 
-COPY --from=buildJar /opt/app .
+COPY --from=buildJar /opt/app/target .
 
 RUN ls
 
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "*.jar"]
 
