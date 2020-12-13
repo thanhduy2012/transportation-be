@@ -17,5 +17,5 @@ COPY --from=buildJar /opt/app/target .
 
 RUN ls
 
-CMD ["java", "-jar", "*.jar"]
+CMD ["java", "-jar", "transportation.jar"]
 

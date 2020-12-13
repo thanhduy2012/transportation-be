@@ -109,6 +109,7 @@
     </profiles>
 
     <build>
+        <finalName>transportation</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
