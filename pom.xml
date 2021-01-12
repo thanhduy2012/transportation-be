@@ -87,6 +87,7 @@
     </dependencies>
 
     <profiles>
+
         <profile>
             <id>dev</id>
             <activation>
@@ -98,6 +99,7 @@
                 <db.pass>thanhduy99</db.pass>
             </properties>
         </profile>
+
         <profile>
             <id>prod</id>
             <properties>
@@ -106,6 +108,8 @@
                 <db.pass>open</db.pass>
             </properties>
         </profile>
+
+
     </profiles>
 
     <build>

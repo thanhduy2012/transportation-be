@@ -15,7 +15,5 @@ WORKDIR /opt/be
 
 COPY --from=buildJar /opt/app/target .
 
-RUN ls
-
 CMD ["java", "-jar", "transportation.jar"]
 
