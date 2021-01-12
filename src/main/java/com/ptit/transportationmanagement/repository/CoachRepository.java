@@ -33,4 +33,6 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
             @Param("fromLastDateMaintenance") LocalDate fromLastDateMaintenance,
             @Param("toLastDateMaintenance") LocalDate toLastDateMaintenance
     );
+
+
 }

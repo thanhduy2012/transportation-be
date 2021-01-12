@@ -26,7 +26,7 @@ public class RouteDTO implements Serializable {
 
     private String createdBy;
 
-    private Long complexityId;
+    private ComplexityDTO complexity;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate createdDate;

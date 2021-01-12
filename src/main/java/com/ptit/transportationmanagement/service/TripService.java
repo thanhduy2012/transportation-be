@@ -5,9 +5,12 @@ import com.ptit.transportationmanagement.client.dto.driver.GetListDriverPagingRe
 import com.ptit.transportationmanagement.client.dto.trip.*;
 import com.ptit.transportationmanagement.common.utils.OptimizedPageUtils;
 import com.ptit.transportationmanagement.common.utils.StringUtils;
-import com.ptit.transportationmanagement.domain.Trip;
-import com.ptit.transportationmanagement.repository.TripRepository;
+import com.ptit.transportationmanagement.domain.*;
+import com.ptit.transportationmanagement.repository.*;
 import com.ptit.transportationmanagement.service.dto.TripDTO;
+import com.ptit.transportationmanagement.service.mapper.CoachMapper;
+import com.ptit.transportationmanagement.service.mapper.DriverMapper;
+import com.ptit.transportationmanagement.service.mapper.RouteMapper;
 import com.ptit.transportationmanagement.service.mapper.TripMapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -31,6 +34,24 @@ public class TripService {
 
     private final TripRepository tripRepository;
 
+    private final DriverTripRepository driverTripRepository;
+
+    private final DriverRepository driverRepository;
+
+    private final DriverMapper driverMapper;
+
+    private final RouteRepository routeRepository;
+
+    private final RouteMapper routeMapper;
+
+    private final CoachRepository coachRepository;
+
+    private final CoachMapper coachMapper;
+
+    private final RouteTripRepository routeTripRepository;
+
+    private final CoachTripRepository coachTripRepository;
+
     private final TripMapper tripMapper;
 
     public CreateTripResponse create(CreateTripRequest request) throws Exception {
@@ -43,12 +64,101 @@ public class TripService {
         if(request.getTrip() == null ){
             throw  new Exception("Driver not null !");
         }
+
+        System.out.println("Request : " + request);
+
+
+
+
         Trip trip= tripMapper.toEntity(request.getTrip());
         trip.setCreatedDate(LocalDate.now());
         trip.setCreatedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+        trip.setDate(request.getTrip().getDate());
         Trip save = tripRepository.save(trip);
 
-        response.setTrip(tripMapper.toDto(save));
+
+
+        Driver mainDriver = new Driver();
+        mainDriver.setId(request.getTrip().getMainDriver().getId());
+
+        Driver supDriver = new Driver();
+        supDriver.setId(request.getTrip().getSupDriver().getId());
+
+        Coach coach = new Coach();
+        coach.setId(request.getTrip().getCoach().getId());
+
+        Route route = new Route();
+        route.setId(request.getTrip().getRoute().getId());
+
+
+        DriverTrip mainDriverTrip = new DriverTrip();
+        DriverTripPK mainDriverTripPK = new DriverTripPK();
+        mainDriverTripPK.setTripId(trip.getId());
+        mainDriverTripPK.setDriverId(request.getTrip().getMainDriver().getId());
+        mainDriverTrip.setId(mainDriverTripPK);
+        mainDriverTrip.setDriver(mainDriver);
+        mainDriverTrip.setTrip(trip);
+        mainDriverTrip.setPosition(1);
+
+        Route rt = routeRepository.findById(request.getTrip().getRoute().getId()).get();
+        mainDriverTrip.setSalary((request.getTrip().getSalary())*rt.getComplexity().getCoefficientSalary());
+        mainDriverTrip.setSalary(request.getTrip().getSalary());
+        mainDriverTrip.setDate(request.getTrip().getDate());
+
+        DriverTrip supDriverTrip = new DriverTrip();
+        DriverTripPK supDriverTripPK = new DriverTripPK();
+        supDriverTripPK.setTripId(trip.getId());
+        supDriverTripPK.setDriverId(request.getTrip().getSupDriver().getId());
+        supDriverTrip.setId(supDriverTripPK);
+        supDriverTrip.setTrip(trip);
+        supDriverTrip.setDriver(supDriver);
+        supDriverTrip.setPosition(0);
+
+        supDriverTrip.setSalary((request.getTrip().getSalary()/2)*rt.getComplexity().getCoefficientSalary());
+        supDriverTrip.setDate(request.getTrip().getDate());
+
+        CoachTrip coachTrip = new CoachTrip();
+        CoachTripPK coachTripPK = new CoachTripPK();
+        coachTripPK.setCoachId(request.getTrip().getCoach().getId());
+        coachTripPK.setTripId(trip.getId());
+        coachTrip.setId(coachTripPK);
+        coachTrip.setCoach(coach);
+        coachTrip.setTrip(trip);
+        coachTrip.setSalary(request.getTrip().getNumberGuest()*request.getTrip().getPrice());
+        coachTrip.setDate(request.getTrip().getDate());
+        coachTrip.setDistance(Double.valueOf(rt.getLength().toString()));
+
+        Double distanced = rt.getLength()*rt.getComplexity().getCoefficientSalary();
+        Coach coach1 = coachRepository.findById(request.getTrip().getCoach().getId()).get();
+
+        int i = (int) (coach1.getNumOfmaintain() - (distanced / 100));
+        coach1.setNumOfmaintain(i);
+        coachRepository.save(coach1);
+
+
+        RouteTrip routeTrip = new RouteTrip();
+        RouteTripPK routeTripPK = new RouteTripPK();
+        routeTripPK.setRouteId(request.getTrip().getRoute().getId());
+        routeTripPK.setTripId(trip.getId());
+        routeTrip.setId(routeTripPK);
+        routeTrip.setRoute(route);
+        routeTrip.setTrip(trip);
+
+
+
+        driverTripRepository.save(mainDriverTrip);
+        driverTripRepository.save(supDriverTrip);
+        coachTripRepository.save(coachTrip);
+        routeTripRepository.save(routeTrip);
+
+        TripDTO tripDTO = tripMapper.toDto(save);
+        tripDTO.setMainDriver(driverMapper.toDto(driverRepository.findById(request.getTrip().getMainDriver().getId()).get()));
+        tripDTO.setSupDriver(driverMapper.toDto(driverRepository.findById(request.getTrip().getSupDriver().getId()).get()));
+        tripDTO.setCoach(coachMapper.toDto(coachRepository.findById(request.getTrip().getCoach().getId()).get()));
+        tripDTO.setRoute(routeMapper.toDto(routeRepository.findById(request.getTrip().getRoute().getId()).get()));
+        tripDTO.setSalaryMainDriver(request.getTrip().getSalary());
+        tripDTO.setSalarySupDriver(request.getTrip().getSalary()/2);
+        response.setTrip(tripDTO);
         return response;
     }
 
@@ -63,13 +173,31 @@ public class TripService {
         TripDTO trip = request.getTrip();
 
         Pageable pageable = PageRequest.of(request.getPageNumber() - 1, request.getPageSize());
-        Page<Trip> paging = tripRepository.findAllTrip(
+        Page<TripDTO> paging = tripRepository.findAllTrip(
                 pageable,
                 !(StringUtils.isEmpty(trip.getCode())) ? trip.getCode() : null,
                 trip.getNumberGuest(),
                 trip.getPrice(),
                 trip.getStatus()
-        );
+        ).map(item->{
+            TripDTO tripDTO = tripMapper.toDto(item);
+
+
+            tripDTO.setCoach(coachMapper.toDto(coachTripRepository.findByTripId(item.getId()).get().getCoach()));
+            tripDTO.setRoute(routeMapper.toDto( routeTripRepository.findByTripId(item.getId()).get().getRoute()));
+
+            DriverTrip sDriverTrip = driverTripRepository.findByTripIdAndPosition(item.getId(), 0).get();
+
+            tripDTO.setSupDriver( driverMapper.toDto(sDriverTrip.getDriver()));
+            tripDTO.setSalarySupDriver(sDriverTrip.getSalary());
+
+            DriverTrip mDriverTrip = driverTripRepository.findByTripIdAndPosition(item.getId(), 1).get();
+
+            tripDTO.setMainDriver( driverMapper.toDto(mDriverTrip.getDriver()));
+            tripDTO.setSalaryMainDriver(mDriverTrip.getSalary());
+            tripDTO.setDate(mDriverTrip.getDate());
+            return tripDTO;
+        });
 
         response.setPage(OptimizedPageUtils.convert(paging));
 

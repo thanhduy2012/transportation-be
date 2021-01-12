@@ -86,7 +86,34 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <db.url>jdbc:mysql://localhost:3306/transport_management</db.url>
+                <db.user>root</db.user>
+                <db.pass>thanhduy99</db.pass>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>prod</id>
+            <properties>
+                <db.url>jdbc:mysql://35.247.133.74:3306/transport_management</db.url>
+                <db.user>root</db.user>
+                <db.pass>open</db.pass>
+            </properties>
+        </profile>
+
+
+    </profiles>
+
     <build>
+        <finalName>transportation</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

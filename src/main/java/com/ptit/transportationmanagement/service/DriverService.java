@@ -4,8 +4,11 @@ import com.ptit.transportationmanagement.client.dto.driver.*;
 import com.ptit.transportationmanagement.common.utils.OptimizedPageUtils;
 import com.ptit.transportationmanagement.common.utils.StringUtils;
 import com.ptit.transportationmanagement.domain.Driver;
+import com.ptit.transportationmanagement.domain.DriverTrip;
 import com.ptit.transportationmanagement.repository.DriverRepository;
+import com.ptit.transportationmanagement.repository.DriverTripRepository;
 import com.ptit.transportationmanagement.service.dto.DriverDTO;
+import com.ptit.transportationmanagement.service.dto.SalaryDriverDTO;
 import com.ptit.transportationmanagement.service.mapper.DriverMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +32,8 @@ public class DriverService {
     private final Logger LOG = LoggerFactory.getLogger(DriverService.class);
 
     private final DriverRepository driverRepository;
+
+    private final DriverTripRepository driverTripRepository;
 
     private final DriverMapper driverMapper;
 
@@ -137,5 +143,35 @@ public class DriverService {
 
         return response;
 
+    }
+
+    public GetSalaryOfDriverWithMonthResponse getSalaryWithMonth(GetSalaryOfDriverWithMonthRequest request) throws Exception {
+        if(request == null) throw new Exception("Request not null");
+        if(request.getDriverId() == null) throw  new Exception("driver id not null");
+
+        List<DriverTrip> byDriverIdAndMonth = driverTripRepository.findByDriverIdAndMonth(request.getDriverId(), ""+request.getMonth());
+
+        double salary  = 0;
+
+
+
+        for(DriverTrip dt : byDriverIdAndMonth){
+            System.out.println("salary : " + dt.getSalary());
+            salary += dt.getSalary();
+        }
+
+
+        SalaryDriverDTO salaryDriver = new SalaryDriverDTO();
+
+        salaryDriver.setDriver(driverMapper.toDto(driverRepository.findById(request.getDriverId()).get()));
+        salaryDriver.setMonth(request.getMonth());
+        salaryDriver.setNumberOfMainDriver(driverTripRepository.findByDriverIdAndPosition(request.getDriverId(), 1).size());
+        salaryDriver.setNumberOfSupportDriver(driverTripRepository.findByDriverIdAndPosition(request.getDriverId(), 0).size());
+        salaryDriver.setSalary(salary);
+
+        GetSalaryOfDriverWithMonthResponse response = new GetSalaryOfDriverWithMonthResponse();
+        response.setSalaryDriverDTO(salaryDriver);
+
+        return response;
     }
 }

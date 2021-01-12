@@ -27,6 +27,25 @@ public class TripDTO implements Serializable {
 
     private Integer status;
 
+    private DriverDTO supDriver;
+
+    private DriverDTO mainDriver;
+
+    private Double salary;
+
+    private RouteDTO route;
+
+    private CoachDTO coach;
+
+    private Double salaryMainDriver;
+
+    private Double salarySupDriver;
+
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate date;
+
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate createdDate;
 

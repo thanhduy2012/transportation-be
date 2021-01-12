@@ -39,7 +39,7 @@ public class Route {
 //    @OneToMany(mappedBy = "route")
 //    private List<RouteTrip> routeTrips;
     @ManyToOne
-    @JoinColumn(name = "complexityId", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "complexityId", referencedColumnName = "id")
     private Complexity complexity;
 
 
